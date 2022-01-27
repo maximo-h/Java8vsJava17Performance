@@ -27,19 +27,19 @@ import org.junit.jupiter.api.BeforeEach;
 
 public abstract class AbstractMainTest
 {
-    private Main main;
+    private ServerMain serverMain;
 
     @BeforeEach
     public void aJettyServer() throws Exception
     {
-        main = new Main(8080);
-        main.start();
+        serverMain = new ServerMain(8080);
+        serverMain.start();
     }
 
     @AfterEach
     public void stopServer() throws Exception
     {
-        main.stop();
+        serverMain.stop();
     }
 
     public String resourceWithUrl(String uri) throws Exception

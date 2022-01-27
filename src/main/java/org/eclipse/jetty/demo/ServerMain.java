@@ -18,14 +18,6 @@
 
 package org.eclipse.jetty.demo;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLClassLoader;
-
 import com.acme.DateServlet;
 import org.apache.tomcat.InstanceManager;
 import org.apache.tomcat.SimpleInstanceManager;
@@ -35,48 +27,51 @@ import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLClassLoader;
 //import org.slf4j.bridge.SLF4JBridgeHandler;
 
 /**
  * Example of using JSP's with embedded jetty and using a
  * lighter-weight ServletContextHandler instead of a WebAppContext.
- *
+ * <p>
  * This example is somewhat odd in that it uses custom tag libs which reside
  * in a WEB-INF directory, even though WEB-INF is not meaningful to
  * a ServletContextHandler. This just shows that once we have
  * properly initialized the jsp engine, you can even use this type of
  * custom taglib, even if you don't have a full-fledged webapp.
  */
-public class Main
-{
-    static
-    {
+public class ServerMain {
+    static {
         // Setup java.util.logging to slf4j bridge
-       // SLF4JBridgeHandler.install();
+        // SLF4JBridgeHandler.install();
     }
 
     // Resource path pointing to where the WEBROOT is
     private static final String WEBROOT_INDEX = "/webroot/";
 
-    public static void main(String[] args) throws Exception
-    {
+    public static void main(String[] args) throws Exception {
         int port = 8080;
 
-        Main main = new Main(port);
-        main.start();
-        main.waitForInterrupt();
+        ServerMain serverMain = new ServerMain(port);
+        serverMain.start();
+        serverMain.waitForInterrupt();
     }
 
     private int port;
     private Server server;
 
-    public Main(int port)
-    {
+    public ServerMain(int port) {
         this.port = port;
     }
 
-    public void start() throws Exception
-    {
+    public void start() throws Exception {
         server = new Server();
 
         // Define ServerConnector
@@ -124,16 +119,13 @@ public class Main
      * @param servletContextHandler the ServletContextHandler to configure
      * @throws IOException if unable to configure
      */
-    private void enableEmbeddedJspSupport(ServletContextHandler servletContextHandler) throws IOException
-    {
+    private void enableEmbeddedJspSupport(ServletContextHandler servletContextHandler) throws IOException {
         // Establish Scratch directory for the servlet context (used by JSP compilation)
         File tempDir = new File(System.getProperty("java.io.tmpdir"));
         File scratchDir = new File(tempDir.toString(), "embedded-jetty-jsp");
 
-        if (!scratchDir.exists())
-        {
-            if (!scratchDir.mkdirs())
-            {
+        if (!scratchDir.exists()) {
+            if (!scratchDir.mkdirs()) {
                 throw new IOException("Unable to create scratch directory: " + scratchDir);
             }
         }
@@ -164,19 +156,19 @@ public class Main
         servletContextHandler.setAttribute(InstanceManager.class.getName(), new SimpleInstanceManager());
     }
 
-    private URI getWebRootResourceUri() throws FileNotFoundException, URISyntaxException
-    {
+    private URI getWebRootResourceUri() throws FileNotFoundException, URISyntaxException {
         URL indexUri = this.getClass().getResource(WEBROOT_INDEX);
-        if (indexUri == null)
-        {
+        if (indexUri == null) {
             throw new FileNotFoundException("Unable to find resource " + WEBROOT_INDEX);
         }
         // Points to wherever /webroot/ (the resource) is
         return indexUri.toURI();
     }
 
-    public void stop() throws Exception
-    {
+    public void stop() throws Exception {
+        if (!server.isStarted()) {
+            return;
+        }
         server.stop();
     }
 
@@ -187,8 +179,7 @@ public class Main
      *
      * @throws InterruptedException if interrupted
      */
-    public void waitForInterrupt() throws InterruptedException
-    {
+    public void waitForInterrupt() throws InterruptedException {
         server.join();
     }
 }
